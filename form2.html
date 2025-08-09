@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Health Survey</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<h2 class="text-xl font-bold mb-4">Health Survey</h2>
+<form id="healthForm" class="bg-white p-4 rounded shadow-md space-y-3">
+  <div>
+    <label>อายุ:</label>
+    <input type="number" id="age" class="border p-2 w-full">
+    <span class="text-red-500 text-sm" id="ageError"></span>
+  </div>
+  <div>
+    <label>เพศ:</label>
+    <div>
+      <label><input type="radio" name="gender" value="ชาย"> ชาย</label>
+      <label><input type="radio" name="gender" value="หญิง"> หญิง</label>
+    </div>
+    <span class="text-red-500 text-sm" id="genderError"></span>
+  </div>
+  <div>
+    <label>น้ำหนัก (กก.):</label>
+    <input type="number" id="weight" class="border p-2 w-full">
+    <span class="text-red-500 text-sm" id="weightError"></span>
+  </div>
+  <div>
+    <label>ส่วนสูง (ซม.):</label>
+    <input type="number" id="height" class="border p-2 w-full">
+    <span class="text-red-500 text-sm" id="heightError"></span>
+  </div>
+  <div>
+    <label><input type="checkbox" id="hasDisease"> มีโรคประจำตัว</label>
+    <textarea id="diseaseDetails" class="border p-2 w-full mt-2 hidden" placeholder="กรอกรายละเอียด"></textarea>
+    <span class="text-red-500 text-sm" id="diseaseError"></span>
+  </div>
+  <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">ส่งแบบสอบถาม</button>
+</form>
+
+<!-- Modal -->
+<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-6 rounded shadow-md w-80 text-center">
+    <p id="modalMessage" class="mb-4"></p>
+    <button id="closeModal" class="bg-blue-600 text-white px-4 py-2 rounded">ปิด</button>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById("modal");
+  const modalMessage = document.getElementById("modalMessage");
+  const closeModal = document.getElementById("closeModal");
+  closeModal.addEventListener("click", () => modal.classList.add("hidden"));
+
+  const hasDisease = document.getElementById("hasDisease");
+  const diseaseDetails = document.getElementById("diseaseDetails");
+  hasDisease.addEventListener("change", () => {
+    diseaseDetails.classList.toggle("hidden", !hasDisease.checked);
+  });
+
+  document.getElementById("healthForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    let valid = true;
+
+    const age = document.getElementById("age");
+    const gender = document.querySelector("input[name='gender']:checked");
+    const weight = document.getElementById("weight");
+    const height = document.getElementById("height");
+
+    ["ageError","genderError","weightError","heightError","diseaseError"].forEach(id => document.getElementById(id).textContent = "");
+
+    if(age.value < 15 || age.value > 60){
+      document.getElementById("ageError").textContent = "อายุต้องระหว่าง 15–60 ปี";
+      valid = false;
+    }
+    if(!gender){
+      document.getElementById("genderError").textContent = "กรุณาเลือกเพศ";
+      valid = false;
+    }
+    if(weight.value <= 0){
+      document.getElementById("weightError").textContent = "น้ำหนักต้องเป็นค่าบวก";
+      valid = false;
+    }
+    if(height.value <= 0){
+      document.getElementById("heightError").textContent = "ส่วนสูงต้องเป็นค่าบวก";
+      valid = false;
+    }
+    if(hasDisease.checked && diseaseDetails.value.trim() === ""){
+      document.getElementById("diseaseError").textContent = "กรุณากรอกรายละเอียดโรคประจำตัว";
+      valid = false;
+    }
+
+    if(valid){
+      const bmi = (weight.value / ((height.value/100)**2)).toFixed(2);
+      let category = "";
+      if(bmi < 18.5) category = "น้ำหนักน้อย";
+      else if(bmi < 25) category = "ปกติ";
+      else if(bmi < 30) category = "น้ำหนักเกิน";
+      else category = "อ้วน";
+
+      modalMessage.textContent = `BMI ของคุณคือ ${bmi} (${category})`;
+      modal.classList.remove("hidden");
+    }
+  });
+</script>
+
+</body>
+</html>
